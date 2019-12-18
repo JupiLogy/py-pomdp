@@ -164,10 +164,9 @@ class POMDPEnvironment:
         return i + 1
 
     def __get_states(self, i):
-        # TODO support states as number
         line = self.contents[i]
         self.states = line.split()[1:]
-        if len(self.states) == 1 and self.states[0].isnumeric():
+        if len(self.states) == 1 and unicode(self.states[0], 'utf-8').isnumeric():
             self.states = self.states[0]
             self.no_states = int(self.states)
             self.states = [str(x) for x in range(1, self.no_states + 1)]
@@ -178,7 +177,7 @@ class POMDPEnvironment:
     def __get_actions(self, i):
         line = self.contents[i]
         self.actions = line.split()[1:]
-        if len(self.actions) == 1 and self.actions[0].isnumeric():
+        if len(self.actions) == 1 and unicode(self.actions[0], 'utf-8').isnumeric():
             self.actions = self.actions[0]
             self.no_actions = int(self.actions)
             self.actions = [str(x) for x in range(1, self.no_actions + 1)]
@@ -189,7 +188,7 @@ class POMDPEnvironment:
     def __get_observations(self, i):
         line = self.contents[i]
         self.observations = line.split()[1:]
-        if len(self.observations) == 1 and self.observations[0].isnumeric():
+        if len(self.observations) == 1 and unicode(self.observations[0], 'utf-8').isnumeric():
             self.observations = self.observations[0]
             self.no_observations = int(self.observations)
             self.observations = [str(x) for x in range(1, self.no_observations + 1)]
@@ -224,7 +223,7 @@ class POMDPEnvironment:
             start_state = self.states.index(pieces[1])
             next_line = self.contents[i+1]
             probs = next_line.split()
-            if self.states.isnumeric():
+            if unicode(self.states, 'utf-8').isnumeric():
                 assert len(probs) == int(self.states)
             else:
                 assert len(probs) == len(self.states)
@@ -457,17 +456,17 @@ class POMDPEnvironment:
         return np.array(b_new)
 
     def print_summary(self):
-        print('discount:', self.discount)
-        print('values:', self.values)
-        print('states:', self.states)
-        print('actions:', self.actions)
-        print('observations:', self.observations)
-        print('')
-        print('T:', self.T)
-        print('')
-        print('Z:', self.Z)
-        print('')
-        print('R:', self.R)
+        print "discount:", self.discount
+        print "values:", self.values
+        print "states:", self.states
+        print "actions:", self.actions
+        print "observations:", self.observations
+        print ""
+        print "T:", self.T
+        print ""
+        print "Z:", self.Z
+        print ""
+        print "R:", self.R
 
 
 class POMDPPolicy:
