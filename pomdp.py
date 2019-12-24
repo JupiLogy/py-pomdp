@@ -92,7 +92,7 @@ class POMDP:
             b2 = 1.0 - b1
             self.belief = np.array([[b1], [b2]])
             best_action, reward = self.get_best_action()
-            print(b1, b2, "\t", self.get_action_str(best_action))
+            print b1, b2, "\t", self.get_action_str(best_action)
 
         # restore to old belief
         self.belief = old_belief
@@ -166,34 +166,25 @@ class POMDPEnvironment:
     def __get_states(self, i):
         line = self.contents[i]
         self.states = line.split()[1:]
-        if len(self.states) == 1 and unicode(self.states[0], 'utf-8').isnumeric():
+        if is_numeric(self.states):
             self.states = self.states[0]
-            self.no_states = int(self.states)
-            self.states = [str(x) for x in range(1, self.no_states + 1)]
-        else:
-            self.no_states = len(self.states)
+            self.states = [str(x) for x in range(int(self.states))]
         return i + 1
 
     def __get_actions(self, i):
         line = self.contents[i]
         self.actions = line.split()[1:]
-        if len(self.actions) == 1 and unicode(self.actions[0], 'utf-8').isnumeric():
+        if is_numeric(self.actions):
             self.actions = self.actions[0]
-            self.no_actions = int(self.actions)
-            self.actions = [str(x) for x in range(1, self.no_actions + 1)]
-        else:
-            self.no_actions = len(self.actions)
+            self.actions = [str(x) for x in range(int(self.actions))]
         return i + 1
 
     def __get_observations(self, i):
         line = self.contents[i]
         self.observations = line.split()[1:]
-        if len(self.observations) == 1 and unicode(self.observations[0], 'utf-8').isnumeric():
+        if is_numeric(self.observations):
             self.observations = self.observations[0]
-            self.no_observations = int(self.observations)
-            self.observations = [str(x) for x in range(1, self.no_observations + 1)]
-        else:
-            self.no_observations = len(self.observations)
+            self.observations = [str(x) for x in range(int(self.observations))]
         return i + 1
 
     def __get_transition(self, i):
@@ -223,10 +214,7 @@ class POMDPEnvironment:
             start_state = self.states.index(pieces[1])
             next_line = self.contents[i+1]
             probs = next_line.split()
-            if unicode(self.states, 'utf-8').isnumeric():
-                assert len(probs) == int(self.states)
-            else:
-                assert len(probs) == len(self.states)
+            assert len(probs) == int(self.states)
             for j in range(len(probs)):
                 prob = float(probs[j])
                 self.T[(action, start_state, j)] = prob
@@ -255,21 +243,24 @@ class POMDPEnvironment:
                 # %f %f ... %f
                 # ...
                 # %f %f ... %f
-                for j in range(int(self.no_states)):
+                for j in range(len(self.states)):
                     probs = next_line.split()
-                    assert len(probs) == int(self.no_states)
+                    assert len(probs) == len(self.states)
                     for k in range(len(probs)):
                         prob = float(probs[k])
                         self.T[(action, j, k)] = prob
                     next_line = self.contents[i+2+j]
-                return i + 1 + self.no_states
+                return i + 1 + len(self.states)
         else:
             raise Exception("Cannot parse line " + line)
 
     def __get_observation(self, i):
         line = self.contents[i]
         pieces = [x for x in line.split() if (x.find(':') == -1)]
-        action = self.actions.index(pieces[0])
+        if pieces[0] == "*":
+            action = None
+        else:
+            action = self.actions.index(pieces[0])
 
         if len(pieces) == 4:
             # case 1: O: <action> : <next-state> : <obs> %f
@@ -329,7 +320,7 @@ class POMDPEnvironment:
                         prob = float(probs[k])
                         self.Z[(action, j, k)] = prob
                     next_line = self.contents[i+2+j]
-                return i + 1 + self.no_states
+                return i + 1 + len(self.states)
         else:
             raise Exception("Cannot parse line: " + line)
 
@@ -341,7 +332,10 @@ class POMDPEnvironment:
         """
         line = self.contents[i]
         pieces = [x for x in line.split() if (x.find(':') == -1)]
-        action = self.actions.index(pieces[0])
+        if pieces[0] == "*":
+            action = None
+        else:
+            action = self.actions.index(pieces[0])
 
         if len(pieces) == 5 or len(pieces) == 4:
             # case 1:
@@ -408,7 +402,7 @@ class POMDPEnvironment:
         next state.
         """
         if next_state_raw == '*':
-            for i in range(self.no_states):
+            for i in range(len(self.states)):
                 self.__reward_ob(a, start_state, i, obs_raw, prob)
         else:
             next_state = self.states.index(next_state_raw)
@@ -505,3 +499,14 @@ class POMDPPolicy:
         highest_expected_reward = res.max()
         best_action = self.action_nums[res.argmax()]
         return (best_action, highest_expected_reward)
+
+
+def is_numeric(set):
+    if len(set) == 1:
+        try:
+            int(set[0])
+            return True
+        except Exception:
+            return False
+    else:
+        return False
