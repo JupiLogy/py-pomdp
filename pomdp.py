@@ -167,21 +167,24 @@ class POMDPEnvironment:
         line = self.contents[i]
         self.states = line.split()[1:]
         if is_numeric(self.states):
-            self.states = [str(x) for x in range(int(self.states[0]))]
+            no_states = self.states[0]
+            self.states = [str(x) for x in range(int(no_states))]
         return i + 1
 
     def __get_actions(self, i):
         line = self.contents[i]
         self.actions = line.split()[1:]
         if is_numeric(self.actions):
-            self.actions = [str(x) for x in range(int(self.actions[0]))]
+            no_actions = self.actions[0]
+            self.actions = [str(x) for x in range(int(no_actions))]
         return i + 1
 
     def __get_observations(self, i):
         line = self.contents[i]
         self.observations = line.split()[1:]
         if is_numeric(self.observations):
-            self.observations = [str(x) for x in range(int(self.observations[0]))]
+            no_observations = self.observations[0]
+            self.observations = [str(x) for x in range(int(no_observations))]
         return i + 1
 
     def __get_transition(self, i):
