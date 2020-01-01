@@ -167,8 +167,8 @@ class POMDPEnvironment:
         line = self.contents[i]
         self.states = line.split()[1:]
         if is_numeric(self.states):
-            no_states = self.states[0]
-            self.states = [str(x) for x in range(int(no_states))]
+            no_states = int(self.states[0])
+            self.states = [str(x) for x in range(no_states)]
         return i + 1
 
     def __get_actions(self, i):
@@ -214,7 +214,7 @@ class POMDPEnvironment:
             start_state = self.states.index(pieces[1])
             next_line = self.contents[i+1]
             probs = next_line.split()
-            assert len(probs) == int(self.states)
+            assert len(probs) == len(self.states)
             for j in range(len(probs)):
                 prob = float(probs[j])
                 self.T[(action, start_state, j)] = prob
@@ -258,6 +258,7 @@ class POMDPEnvironment:
         line = self.contents[i]
         pieces = [x for x in line.split() if (x.find(':') == -1)]
         if pieces[0] == "*":
+            # Case when action does not affect observation
             action = None
         else:
             action = self.actions.index(pieces[0])
@@ -501,10 +502,10 @@ class POMDPPolicy:
         return (best_action, highest_expected_reward)
 
 
-def is_numeric(set):
-    if len(set) == 1:
+def is_numeric(lst):
+    if len(lst) == 1:
         try:
-            int(set[0])
+            int(lst[0])
             return True
         except Exception:
             return False
